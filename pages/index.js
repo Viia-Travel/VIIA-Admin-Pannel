@@ -6,6 +6,8 @@ import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/solid';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from "next/router";
+import useLogin from "@/hooks/mutations/login";
+import ButtonLoader from "@/components/ui/buttonLoader";
 
 const loginSchema = yup.object({
   email: yup
@@ -18,6 +20,7 @@ const loginSchema = yup.object({
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter()
+  const login = useLogin()
   const formik = useFormik({
     initialValues: {
       email: '',
@@ -25,7 +28,10 @@ const Login = () => {
     },
     validationSchema: loginSchema,
     onSubmit: async (values) => {
-      router.push("/dashboard")
+      const formData= new FormData()
+      formData.append("email",values.email)
+      formData.append("password",values.password)
+      login.mutate(formData)
     },
   });
 
@@ -117,9 +123,10 @@ const Login = () => {
 
             <button
               type="submit"
-              className="text-white bg-primary-500 w-full py-2 rounded-lg font-[500] hover:bg-green-600 cursor-pointer duration-300 ease-in-out my-2"
+              className="text-white bg-primary-500 w-full flex justify-center py-2 rounded-lg font-[500] hover:bg-green-600 cursor-pointer duration-300 ease-in-out my-2"
             >
-              Sign in
+              {login.isLoading ? <ButtonLoader text={'Singing in...'}/> : 'Sign in' }
+             
             </button>
           </form>
 

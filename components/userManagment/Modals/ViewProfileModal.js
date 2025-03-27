@@ -9,9 +9,11 @@ import UnFlaggingUserModal from "./UnFlaggingUser";
 import VerifyUserModal from "./VerifyUserModal";
 import EditUserModal from "./EditUserModal";
 import { Dialog, DialogTitle } from "@mui/material";
+import { UseGetProfile } from "@/hooks/query/getProfile";
 
 const ViewProfileModal = ({ data: profile, isOpen, onClose }) => {
     const [activeTab, setActiveTab] = useState("about");
+    const {data:ProfileData}=UseGetProfile()
     const [activeInnerModal, setActiveInnerModal] = useState(null);
 
     const handleCloseModal = () => {
@@ -78,14 +80,14 @@ const ViewProfileModal = ({ data: profile, isOpen, onClose }) => {
                 </DialogTitle>
 
                 <div className="p-4 h-[700px] overflow-y-scroll">
-
+{ProfileData && 
                     <div className="px-3 flex flex-col justify-center items-center my-4">
                         <div className="relative w-full">
                             <img src={data.coverPicture} alt="Cover" className="w-full object-fill" />
                             <div className="flex flex-col items-start relative">
                                 <div className="absolute left-10 -top-12 pl-3 transform -translate-x-1/2">
                                     <img
-                                        src={data.profilePicture}
+                                        src={ProfileData.avatar}
                                         alt="Profile"
                                         className="w-28 h-28 rounded-full "
                                     />
@@ -95,7 +97,7 @@ const ViewProfileModal = ({ data: profile, isOpen, onClose }) => {
                                 </div>
 
                                 <div className="mt-16">
-                                    <h3 className="text-lg font-semibold -mt-2 ">{data.name}</h3>
+                                    <h3 className="text-lg font-semibold -mt-2 ">{ProfileData.fname + ' '+ ProfileData.lname}</h3>
                                     <div className="text-gray-500 flex space-x-3">
                                         <p>{data.bio}</p>
                                         <p>
@@ -142,7 +144,8 @@ const ViewProfileModal = ({ data: profile, isOpen, onClose }) => {
                         </div>
                     </div>
 
-                    <div className="mt-3">
+                                    }
+                <div className="mt-3">
                         <div className="border-b border-gray-200">
                             <nav className="-mb-px flex">
                                 <button

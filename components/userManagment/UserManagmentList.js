@@ -4,9 +4,13 @@ import Table from "../ui/Table";
 import DashboardCards from "../dashboard/dashboardCards";
 import { allUsersColumns, unVerifiedUserColumns, deactivatedUserColumns, flaggedUserColumns } from "../ui/contants";
 import { SearchIcon,  ListFilter } from "lucide-react";
+import { UseGetUserList } from "@/hooks/query/users/getUserList";
+import { UseGetVerificationDocs } from "@/hooks/query/users/getVerificationdoc";
 
 const UserManagementList = () => {
   const [currentTopNavigationLink, setCurrentTopNavigationLink] = useState(0);
+  const {data:UserList ,isLoadingUser}=UseGetUserList()
+  
   const [searchQuery, setSearchQuery] = useState("");
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [filters, setFilters] = useState({
@@ -17,138 +21,7 @@ const UserManagementList = () => {
     flagStatus: null,
   });
 
-  const allUserRows = [
-    {
-      id: 1,
-      Email: "Snow",
-      FullName: "Jon",
-      PhoneNumber: "347324893",
-      DateRegistered: "2 June 2023",
-      Gender: "Male",
-      UserType: "Driver",
-      ActiveStatus: "Active",
-      RidesCount: 10,
-      Flagged: "flag",
-      VerificationStatus: "verified",
-    },
-    {
-      id: 2,
-      Email: "Snow",
-      FullName: "Jon",
-      PhoneNumber: "347324893",
-      DateRegistered: "2 June 2023",
-      Gender: "Male",
-      UserType: "Driver",
-      ActiveStatus: "Active",
-      RidesCount: 10,
-      Flagged: "flag",
-      VerificationStatus: "verified",
-    },
-    {
-      id: 3,
-      Email: "Snow",
-      FullName: "Jon",
-      PhoneNumber: "347324893",
-      DateRegistered: "2 June 2023",
-      Gender: "Male",
-      UserType: "Driver",
-      ActiveStatus: "Active",
-      RidesCount: 10,
-      Flagged: "flag",
-      VerificationStatus: "verified",
-    },
-    {
-      id: 4,
-      Email: "Snow",
-      FullName: "Jon",
-      PhoneNumber: "347324893",
-      DateRegistered: "2 June 2023",
-      Gender: "Male",
-      UserType: "Driver",
-      ActiveStatus: "Active",
-      RidesCount: 10,
-      Flagged: "flag",
-      VerificationStatus: "verified",
-    },
-    {
-      id: 5,
-      Email: "Snow",
-      FullName: "Jon",
-      PhoneNumber: "347324893",
-      DateRegistered: "2 June 2023",
-      Gender: "Male",
-      UserType: "Driver",
-      ActiveStatus: "Active",
-      RidesCount: 10,
-      Flagged: "flag",
-      VerificationStatus: "verified",
-    },
-    {
-      id: 6,
-      Email: "Snow",
-      FullName: "Jon",
-      PhoneNumber: "347324893",
-      DateRegistered: "2 June 2023",
-      Gender: "Male",
-      UserType: "Driver",
-      ActiveStatus: "Active",
-      RidesCount: 10,
-      Flagged: "flag",
-      VerificationStatus: "verified",
-    },
-    {
-      id: 7,
-      Email: "Snow",
-      FullName: "Jon",
-      PhoneNumber: "347324893",
-      DateRegistered: "2 June 2023",
-      Gender: "Male",
-      UserType: "Driver",
-      ActiveStatus: "Active",
-      RidesCount: 10,
-      Flagged: "flag",
-      VerificationStatus: "verified",
-    },
-    {
-      id: 8,
-      Email: "Snow",
-      FullName: "Jon",
-      PhoneNumber: "347324893",
-      DateRegistered: "2 June 2023",
-      Gender: "Male",
-      UserType: "Driver",
-      ActiveStatus: "Active",
-      RidesCount: 10,
-      Flagged: "flag",
-      VerificationStatus: "verified",
-    },
-    {
-      id: 9,
-      Email: "Snow",
-      FullName: "Jon",
-      PhoneNumber: "347324893",
-      DateRegistered: "2 June 2023",
-      Gender: "Male",
-      UserType: "Driver",
-      ActiveStatus: "Active",
-      RidesCount: 10,
-      Flagged: "flag",
-      VerificationStatus: "verified",
-    },
-    {
-      id: 10,
-      Email: "Snow",
-      FullName: "Jon",
-      PhoneNumber: "347324893",
-      DateRegistered: "2 June 2023",
-      Gender: "Male",
-      UserType: "Driver",
-      ActiveStatus: "Active",
-      RidesCount: 10,
-      Flagged: "flag",
-      VerificationStatus: "verified",
-    },
-  ];
+
   const unVerifiedUserRows = [
     {
       id: 1,
@@ -421,7 +294,7 @@ const UserManagementList = () => {
   ];
 
   const tableConfigurations = [
-    { rows: allUserRows, columns: allUsersColumns },
+    { rows: UserList, columns: allUsersColumns },
     { rows: unVerifiedUserRows, columns: unVerifiedUserColumns },
     { rows: deactivatedUserRows, columns: deactivatedUserColumns },
     { rows: flaggedUserRows, columns: flaggedUserColumns },
@@ -429,19 +302,11 @@ const UserManagementList = () => {
 
   const currentConfig = tableConfigurations[currentTopNavigationLink];
 
-  const filteredRows = currentConfig.rows.filter((row) =>
-    Object.values(row).some(
-      (value) =>
-        value &&
-        value
-          .toString()
-          .toLowerCase()
-          .includes(searchQuery.toLowerCase())
-    )
-  );
-
   const applyFilters = () => {
+    if (!currentConfig.rows || currentConfig.rows.length === 0) return []; // Handle empty or undefined data
+  
     let filtered = currentConfig.rows;
+  
     if (filters.userType) {
       filtered = filtered.filter(row => row.UserType === filters.userType);
     }
@@ -457,19 +322,21 @@ const UserManagementList = () => {
     if (filters.flagStatus) {
       filtered = filtered.filter(row => row.Flagged === filters.flagStatus);
     }
+  
     return filtered;
   };
+  
 
-  const filteredAndSearchedRows = applyFilters().filter((row) =>
-    Object.values(row).some(
-      (value) =>
-        value &&
-        value
-          .toString()
-          .toLowerCase()
-          .includes(searchQuery.toLowerCase())
+  const filteredAndSearchedRows = currentConfig?.rows?.length
+  ? applyFilters().filter((row) =>
+      Object.values(row).some(
+        (value) =>
+          value &&
+          value.toString().toLowerCase().includes(searchQuery.toLowerCase())
+      )
     )
-  );
+  : [];
+
 
   const handleFilterChange = (category, value) => {
     setFilters({
@@ -747,7 +614,7 @@ const UserManagementList = () => {
 
 
         </div>
-
+{}
         <Table rows={filteredAndSearchedRows} columns={currentConfig.columns} />
       </div>
     </div>

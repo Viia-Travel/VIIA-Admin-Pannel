@@ -35,9 +35,9 @@ export const getPaymentLogo = (method) => {
 };
 
 export const allUsersColumns = [
-  { field: "FullName", headerName: "Full name", flex: 1 },
+  { field: "name", headerName: "Full name", flex: 1 },
   {
-    field: "Email",
+    field: "email",
     headerName: "Email",
     flex: 1,
     renderCell: (params) => {
@@ -50,14 +50,14 @@ export const allUsersColumns = [
       );
     }
   },
-  { field: "PhoneNumber", headerName: "Phone number", flex: 1 },
+  { field: "phone", headerName: "Phone number", flex: 1 },
   {
     field: "DateRegistered",
     headerName: "Date registered",
     flex: 1,
   },
   {
-    field: "Gender",
+    field: "gender",
     headerName: "Gender",
     flex: 1,
   },

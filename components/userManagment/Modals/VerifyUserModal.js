@@ -1,18 +1,23 @@
 import { XMarkIcon } from "@heroicons/react/24/solid";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { DownloadIcon } from "lucide-react";
 import ResendDocumentsForm from "./ResendDocuments";
 import { Dialog, DialogTitle } from "@mui/material";
+import { UseGetVerificationDocs } from "@/hooks/query/users/getVerificationdoc";
+import useVerifyUser from "@/hooks/mutations/users/verifyUser";
 
 const VerifyUserModal = ({ data, isOpen, onClose }) => {
   const [currentToggle, setCurrentToggle] = useState(0);
   const [selectedIdFile, setSelectedIdFile] = useState(null); // State for ID file
   const [selectedPhotoFile, setSelectedPhotoFile] = useState(null); // State for photo file
-  const userTypes = ["Passenger", "Driver"];
-  const options = ["Option 1", "Option 2", "Option 3"];
+
+  const { data: VerificationDoc } = UseGetVerificationDocs(data.id)
+  const userTypes = ["passenger", "driver"];
+
   const [showResendForm, setShowResendForm] = useState(false);
+  const verifyUser = useVerifyUser()
 
   const carDetails = {
     carName: {
@@ -89,20 +94,39 @@ const VerifyUserModal = ({ data, isOpen, onClose }) => {
 
   // Formik form submit function
   const onSubmit = (values, { setSubmitting }) => {
-    console.log(values); // Handle form submission logic here
+    // verifyUser.mutate(
+    //   {
+    //     id: data.id,
+    //     type: currentToggle == 0 ? 'passenger' : 'driver'
+    //   }
+    // )
     setSubmitting(false);
     onClose(); // Close modal after form submission
   };
 
-  // Initialize Formik form
-  const formik = useFormik({
-    initialValues: {
-      selectedOption: "",
-      email: "",
-    },
-    validationSchema: validationSchema,
-    onSubmit: onSubmit,
-  });
+  const submit=()=>{
+    verifyUser.mutate(
+      {
+        id: data.id,
+        type: currentToggle == 0 ? 'passenger' : 'driver'
+      },
+      {
+        onSuccess:()=>{
+          onClose(); 
+        }
+      }
+    )
+    
+   
+  }  // Initialize Formik form
+  // const formik = useFormik({
+  //   initialValues: {
+  //     selectedOption: "",
+  //     email: "",
+  //   },
+  //   validationSchema: validationSchema,
+  //   onSubmit: onSubmit,
+  // });
 
   const handleCloseModal = () => {
     onClose();
@@ -157,7 +181,7 @@ const VerifyUserModal = ({ data, isOpen, onClose }) => {
             <button
               key={index}
               onClick={() => setCurrentToggle(index)}
-              className={`px-4 py-2 w-1/2 font-bold rounded-l ${currentToggle !== index
+              className={`px-4 capitalize py-2 w-1/2 font-bold rounded-l ${currentToggle !== index
                 ? "text-black bg-white"
                 : "text-gray-700 bg-gray-100 hover:bg-gray-200"
                 }`}
@@ -170,7 +194,7 @@ const VerifyUserModal = ({ data, isOpen, onClose }) => {
           <ResendDocumentsForm onClose={() => setShowResendForm(false)} />
           :
           <>
-            <form onSubmit={formik.handleSubmit}>
+            {/* <form onSubmit={formik.handleSubmit}> */}
               <div className="grid grid-cols-2 gap-3 my-3">
                 <div className="">
                   <label
@@ -179,26 +203,17 @@ const VerifyUserModal = ({ data, isOpen, onClose }) => {
                   >
                     Name of the user
                   </label>
-                  <select
+                  <input
+                    type="text"
                     id="selectedOption"
                     name="selectedOption"
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    value={formik.values.selectedOption}
+                    // onChange={formik.handleChange}
+                    // onBlur={formik.handleBlur}
+                    value={data.name}
                     className="mt-1 block w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
-                  >
-                    <option value="">Select an option</option>
-                    {options.map((option, index) => (
-                      <option key={index} value={option}>
-                        {option}
-                      </option>
-                    ))}
-                  </select>
-                  {formik.touched.selectedOption && formik.errors.selectedOption ? (
-                    <div className="text-red-500 text-sm mt-1">
-                      {formik.errors.selectedOption}
-                    </div>
-                  ) : null}
+                    placeholder="Enter your email"
+                  />
+
                 </div>
                 <div className="">
                   <label
@@ -211,17 +226,13 @@ const VerifyUserModal = ({ data, isOpen, onClose }) => {
                     type="email"
                     id="email"
                     name="email"
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    value={formik.values.email}
+                    // onChange={formik.handleChange}
+                    // onBlur={formik.handleBlur}
+                    value={data.email}
                     className="mt-1 block w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
                     placeholder="Enter your email"
                   />
-                  {formik.touched.email && formik.errors.email ? (
-                    <div className="text-red-500 text-sm mt-1">
-                      {formik.errors.email}
-                    </div>
-                  ) : null}
+
                 </div>
               </div>
               <div className="mb-6">
@@ -316,14 +327,15 @@ const VerifyUserModal = ({ data, isOpen, onClose }) => {
                   </button>
                   <button
                     type="submit"
+                    onClick={()=>submit()}
                     className="bg-green-500 text-white font-bold py-2 px-4 rounded hover:bg-green-700"
-                    disabled={formik.isSubmitting}
+                    // disabled={formik.isSubmitting}
                   >
                     Verify User
                   </button>
                 </div>
               </div>
-            </form>
+            {/* </form> */}
           </>
         }
       </div>

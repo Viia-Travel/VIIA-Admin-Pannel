@@ -3,18 +3,29 @@ import React from "react";
 import { AlertTitle, Dialog, DialogTitle } from "@mui/material";
 import { AlertTriangle, InfoIcon } from "lucide-react";
 import { useRouter } from "next/router";
+import useLogout from "@/hooks/mutations/logout";
 
 const LogoutModal = ({ isOpen, onClose }) => {
     // Formik form validation schema using Yup
-
-    const router= useRouter()
+    const logout = useLogout()
+    const router = useRouter()
+   
     const HanleLogout = () => {
-        onClose();
-        successToaster("Logout Successfully");
-
-        router.push('/')
-    }
-
+        logout.mutate( {
+            onSuccess: (res) => {
+                
+                onClose();
+                successToaster("Logout Successfully");
+                  localStorage.removeItem('authToken');
+       
+                router.push('/');
+            },
+            onError: (err) => {
+                console.error("Error:", err); 
+            }
+        });
+    };
+    
     const handleCloseModal = () => {
         onClose(); // Call the onClose function passed from parent to close the modal
     };
