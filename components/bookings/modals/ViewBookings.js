@@ -8,7 +8,7 @@ import DriverDetails, { PassengerDetails } from "./DriverPassengerDetails";
 const ViewBookingModal = ({ isOpen, onClose, data, userType }) => {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
-   
+
     const handleDelete = () => {
         setShowDeleteModal(true);
     };
@@ -17,7 +17,7 @@ const ViewBookingModal = ({ isOpen, onClose, data, userType }) => {
         setShowEditModal(true);
     };
 
-   
+
     const getHeading = () => {
         switch (userType) {
             case "booking":
@@ -47,18 +47,18 @@ const ViewBookingModal = ({ isOpen, onClose, data, userType }) => {
                 <div className="p-6 space-y-3">
 
                     {/* Driver's Details */}
-                    {userType !== 'Requested' &&
-                       <DriverDetails/>
+                    {userType !== 'Requested' && data?.driver &&
+                        <DriverDetails driver={data?.driver} />
                     }
                     {/* passengers Detaiil */}
-                    {userType !== 'Published' &&
-                      <PassengerDetails userType={userType}/>
+                    {userType !== 'Published' && data?.passengers?.length > 0 &&
+                        <PassengerDetails passenger={data?.passengers} userType={userType} />
                     }
                     {/* Ride Details */}
                     <div className="space-y-2 font-semibold text-base">
                         <div className="">
                             <p className="text-sm font-normal">Pickup Point:</p>
-                            <p>{data.pickup_point}</p>
+                            <p>{data.pickup}</p>
                         </div>
                         <div className="mt-3">
                             <p className="text-sm font-normal">Destination:</p>
@@ -66,13 +66,15 @@ const ViewBookingModal = ({ isOpen, onClose, data, userType }) => {
                         </div>
 
                         <div className="grid grid-cols-2 space-y-4">
-                            <div className="">
-                                <p className="text-sm font-normal">Seats:</p>
-                                <p>{data.seats}</p>
-                            </div>
+                            {data?.car_space &&
+                                <div className="">
+                                    <p className="text-sm font-normal">Seats:</p>
+                                    <p>{data?.car_space}</p>
+                                </div>
+                            }
                             <div>
                                 <p className="text-sm font-normal">Price:</p>
-                                <p>{data.price}</p>
+                                <p>{data.cost}</p>
                             </div>
                             <div>
                                 <p className="text-sm font-normal">Date:</p>

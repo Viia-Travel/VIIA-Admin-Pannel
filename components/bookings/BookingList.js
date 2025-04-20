@@ -2,13 +2,15 @@ import React, { useState } from "react";
 import Table from "../ui/Table";
 
 import DashboardCards from "../dashboard/dashboardCards";
-import { allUsersColumns, unVerifiedUserColumns, deactivatedUserColumns, flaggedUserColumns, allBookingsColumn, requestedRidesColumn, publishedRidesColumn, deletedBookingsColumn } from "../ui/contants";
+import { allBookingsColumn, requestedRidesColumn, publishedRidesColumn, deletedBookingsColumn } from "../ui/contants";
 import { SearchIcon, ListFilter } from "lucide-react";
+import { UseGetAllRidesList } from "@/hooks/query/getRidesList";
 
 const BookingList = () => {
     const [currentTopNavigationLink, setCurrentTopNavigationLink] = useState(0);
     const [searchQuery, setSearchQuery] = useState("");
     const [isFilterOpen, setIsFilterOpen] = useState(false);
+    const {data:AllRides}=UseGetAllRidesList()
     const [filters, setFilters] = useState({
         userType: null,
         verificationStatus: null,
@@ -17,102 +19,10 @@ const BookingList = () => {
         flagStatus: null,
     });
 
-    const allBookingsRows = [
-        {
-            id: 1,
-            driver_name: "John Doe",
-            passenger_name: "Jane Smith",
-            pickup_point: "Central Park",
-            destination: "Times Square",
-            date: "Aug 1, 2024",
-            time: "10:00 AM",
-            seats: 2,
-            price: "$30",
-        },
-        {
-            id: 2,
-            driver_name: "Alice Brown",
-            passenger_name: "Mark Johnson",
-            pickup_point: "Grand Central",
-            destination: "Wall Street",
-            date: "Aug 2, 2024",
-            time: "2:30 PM",
-            seats: 3,
-            price: "$45",
-        },
-        {
-            id: 3,
-            driver_name: "Michael Lee",
-            passenger_name: "Emily Davis",
-            pickup_point: "Broadway",
-            destination: "Brooklyn",
-            date: "Aug 3, 2024",
-            time: "1:15 PM",
-            seats: 1,
-            price: "$25",
-        },
-    ];
-    const requestedRidesRows = [
-        {
-            id: 1,
-            passenger_name: "Sarah Connor",
-            pickup_point: "5th Avenue",
-            destination: "Empire State Building",
-            date: "Aug 4, 2024",
-            time: "11:00 AM",
-            price: "$35",
-        },
-        {
-            id: 2,
-            passenger_name: "Tom Hanks",
-            pickup_point: "Union Square",
-            destination: "Madison Square Garden",
-            date: "Aug 5, 2024",
-            time: "4:00 PM",
-            price: "$20",
-        },
-        {
-            id: 3,
-            passenger_name: "Olivia Williams",
-            pickup_point: "Harlem",
-            destination: "Yankee Stadium",
-            date: "Aug 6, 2024",
-            time: "9:30 AM",
-            price: "$40",
-        },
-    ];
-    const publishedRidesRows = [
-        {
-            id: 1,
-            driver_name: "David Clark",
-            pickup_point: "Chelsea Market",
-            destination: "Battery Park",
-            date: "Aug 7, 2024",
-            time: "12:00 PM",
-            seats: 4,
-            price: "$50",
-        },
-        {
-            id: 2,
-            driver_name: "Linda Harris",
-            pickup_point: "Chinatown",
-            destination: "Little Italy",
-            date: "Aug 8, 2024",
-            time: "3:45 PM",
-            seats: 2,
-            price: "$30",
-        },
-        {
-            id: 3,
-            driver_name: "Robert Lewis",
-            pickup_point: "SoHo",
-            destination: "Greenwich Village",
-            date: "Aug 9, 2024",
-            time: "8:00 AM",
-            seats: 3,
-            price: "$35",
-        },
-    ];
+    
+    const requestedRides = AllRides?.filter((ride) => ride.ride_type === "requested");
+    const publishedRides = AllRides?.filter((ride) => ride.ride_type === "published");
+    
     const deletedBookingsRows = [
         {
             id: 1,
@@ -142,8 +52,6 @@ const BookingList = () => {
             reason: "Weather conditions",
         },
     ];
-
-
     const bookingTypes = [
         {
             type: "All Bookings",
@@ -164,15 +72,15 @@ const BookingList = () => {
     ];
 
     const tableConfigurations = [
-        { rows: allBookingsRows, columns: allBookingsColumn },
-        { rows: requestedRidesRows, columns: requestedRidesColumn },
-        { rows: publishedRidesRows, columns: publishedRidesColumn },
+        { rows: AllRides, columns: allBookingsColumn },
+        { rows: requestedRides, columns: requestedRidesColumn },
+        { rows: publishedRides, columns: publishedRidesColumn },
         { rows: deletedBookingsRows, columns: deletedBookingsColumn },
     ];
 
     const currentConfig = tableConfigurations[currentTopNavigationLink];
 
-    const filteredRows = currentConfig.rows.filter((row) =>
+    const filteredRows = currentConfig?.rows?.filter((row) =>
         Object.values(row).some(
             (value) =>
                 value &&
@@ -203,7 +111,7 @@ const BookingList = () => {
         return filtered;
     };
 
-    const filteredAndSearchedRows = applyFilters().filter((row) =>
+    const filteredAndSearchedRows = applyFilters()?.filter((row) =>
         Object.values(row).some(
             (value) =>
                 value &&

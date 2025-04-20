@@ -11,58 +11,22 @@ import EditUserModal from "./EditUserModal";
 import { Dialog, DialogTitle } from "@mui/material";
 import { UseGetProfile } from "@/hooks/query/getProfile";
 
+import { CircularProgress } from "@mui/material"; // MUI spinner
+
 const ViewProfileModal = ({ data: profile, isOpen, onClose }) => {
     const [activeTab, setActiveTab] = useState("about");
-    const {data:ProfileData}=UseGetProfile()
+    const { data: ProfileData, isLoading } = UseGetProfile(profile.id);
     const [activeInnerModal, setActiveInnerModal] = useState(null);
 
-    const handleCloseModal = () => {
-        onClose();
-    };
+    const handleCloseModal = () => onClose();
+    const handleTabClick = (tab) => setActiveTab(tab);
+    const handleInnerModalClose = () => setActiveInnerModal(null);
+    const handleOpenInnerModal = (modalType) => setActiveInnerModal(modalType);
 
-    const handleTabClick = (tab) => {
-        setActiveTab(tab);
-    };
-
-    const handleInnerModalClose = () => {
-        setActiveInnerModal(null);
-    };
-
-    const handleOpenInnerModal = (modalType) => {
-        setActiveInnerModal(modalType);
-    };
-
-    const data = {
+    const dummyData = {
         coverPicture: "/assets/cover.svg",
-        profilePicture: "/assets/user.svg",
         isVerified: true,
-        name: "John Doe",
         bio: "Driver | Passenger",
-        email: "john.doe@example.com",
-        phone: "123-456-7890",
-        dob: "January 1, 1980",
-        gender: "Male",
-        activeStatus: "Active",
-        rideCount: 123,
-        registrationDate: "January 1, 2020",
-        verificationDate: "February 1, 2020",
-        carDetails: {
-            model: "Green Toyota Prius 2023",
-            licenseNumber: "SYV-0937BVC",
-            color: "Green",
-            feature: "/assets/car_info.svg",
-        },
-        driverPreferences: [
-            { label: "You can smoke", icon: "/assets/smoke.svg" },
-            { label: "Love to chat", icon: "/assets/chat.svg" },
-            { label: "No music", icon: "/assets/no_music.svg" },
-        ],
-        topPreferences: [
-            { label: "Mountain climbing", icon: "/assets/mountains.svg" },
-            { label: "Boxing", icon: "/assets/boxing.svg" },
-            { label: "Driving", icon: "/assets/driving.svg" },
-            { label: "Paragliding", icon: "/assets/paragliding.svg" },
-        ],
     };
 
     return (
@@ -80,219 +44,145 @@ const ViewProfileModal = ({ data: profile, isOpen, onClose }) => {
                 </DialogTitle>
 
                 <div className="p-4 h-[700px] overflow-y-scroll">
-{ProfileData && 
-                    <div className="px-3 flex flex-col justify-center items-center my-4">
-                        <div className="relative w-full">
-                            <img src={data.coverPicture} alt="Cover" className="w-full object-fill" />
-                            <div className="flex flex-col items-start relative">
-                                <div className="absolute left-10 -top-12 pl-3 transform -translate-x-1/2">
-                                    <img
-                                        src={ProfileData.avatar}
-                                        alt="Profile"
-                                        className="w-28 h-28 rounded-full "
-                                    />
-                                    {data.isVerified && (
-                                        <CheckBadgeIcon className="absolute bottom-6 right-0 h-6 w-6 text-blue-500" />
-                                    )}
+                    {/* Loader */}
+                    {isLoading ? (
+                        <div className="flex items-center justify-center h-full">
+                            <CircularProgress />
+                        </div>
+                    ) : ProfileData ? (
+                        <>
+                            {/* Profile Header */}
+                            <div className="px-3 flex flex-col justify-center items-center my-4">
+                                <div className="relative w-full">
+                                    <img src={dummyData.coverPicture} alt="Cover" className="w-full object-fill" />
+                                    <div className="flex flex-col items-start relative">
+                                        <div className="absolute left-10 -top-12 pl-3 transform -translate-x-1/2">
+                                            <img
+                                                src={ProfileData?.avatar}
+                                                alt="Profile"
+                                                className="w-28 h-28 rounded-full "
+                                            />
+                                            {dummyData.isVerified && (
+                                                <CheckBadgeIcon className="absolute bottom-4 -right-2 h-6 w-6 text-blue-500" />
+                                            )}
+                                        </div>
+
+                                        <div className="mt-16">
+                                            <h3 className="text-lg font-semibold">{ProfileData.fname + ' ' + ProfileData.lname}</h3>
+                                            <div className="text-gray-500 flex space-x-3">
+                                                <p>Driver | Passenger</p>
+                                                <p>
+                                                    <span className={`${profile.VerificationStatus === "verified"
+                                                        ? "bg-primary-200 text-primary-600"
+                                                        : "bg-gray-200"
+                                                        } rounded-full px-2 `}>
+                                                        {profile.VerificationStatus}
+                                                    </span>
+                                                </p>
+                                                {profile?.deactivated ? (
+                                                    <span className="bg-red-100 rounded-full px-2 text-sm text-red-700 capitalize">
+                                                        Deactivated
+                                                    </span>
+                                                ) : (
+                                                    profile?.flagged === 'flagged' && (
+                                                        <p className="flex items-center">
+                                                            <span className="bg-[#F3FEE7] rounded-full px-2 text-sm text-green-700 capitalize">
+                                                                {profile.flagged}
+                                                            </span>
+                                                            <img src="/assets/flag.svg" className="h-5 w-5 ml-2" />
+                                                        </p>
+                                                    )
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Tabs */}
+                            <div className="mt-3">
+                                <div className="border-b border-gray-200">
+                                    <nav className="-mb-px flex">
+                                        {["about", "passenger", "driver"].map(tab => (
+                                            <button
+                                                key={tab}
+                                                className={`mr-8 py-4 px-1 text-center border-b-2 font-medium text-sm ${activeTab === tab
+                                                    ? "border-indigo-500 text-indigo-600"
+                                                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                                                    }`}
+                                                onClick={() => handleTabClick(tab)}
+                                            >
+                                                {tab === "about" ? "About" : `Trip as ${tab.charAt(0).toUpperCase() + tab.slice(1)}`}
+                                            </button>
+                                        ))}
+                                    </nav>
                                 </div>
 
-                                <div className="mt-16">
-                                    <h3 className="text-lg font-semibold -mt-2 ">{ProfileData.fname + ' '+ ProfileData.lname}</h3>
-                                    <div className="text-gray-500 flex space-x-3">
-                                        <p>{data.bio}</p>
-                                        <p>
-                                            <span
-                                                className={`${profile.VerificationStatus == "verified"
-                                                    ? "bg-primary-200 text-primary-600"
-                                                    : "bg-gray-200"
-                                                    } rounded-full px-2 `}
-                                            >
-                                                {profile.VerificationStatus}
-                                            </span>
-                                        </p>
-                                        {profile?.deactivated ? (
-                                            <p>
-                                                <span
-                                                    className={`
-                                                    bg-red-100
-                                                     rounded-full px-2 text-sm text-red-700 capitalize`}
-                                                >
-                                                    Deactivated
-                                                </span>
-                                            </p>
-                                        ) : (
-                                            profile?.flagged === 'flagged' && (
-                                                <p className="flex items-center">
-                                                    <span
-                                                        className={`
-                                                    bg-[#F3FEE7]
-                                                     rounded-full px-2 text-sm text-green-700 capitalize`}
-                                                    >
-                                                        {profile.flagged}
-                                                    </span>
+                                {/* Tab Content */}
+                                <div className="mt-4">
+                                    {activeTab === "about" && <AboutTab profile={ProfileData} />}
+                                    {activeTab === "passenger" && <TripAsPassengerTab />}
+                                    {activeTab === "driver" && <TripAsDriverTab />}
+                                </div>
 
-                                                    <img
-                                                        src="/assets/flag.svg"
-                                                        className="h-5 w-5 ml-2 text-green-300"
-                                                    />
-                                                </p>
-                                            )
+                                {/* Action Buttons */}
+                                <div className="flex items-center justify-end mt-8 sticky -bottom-4 bg-white py-3">
+                                    <div className="space-x-4">
+                                        {profile.Flagged !== "flag" && (
+                                            <button className="text-sm font-semibold text-red-500 hover:text-red-600"
+                                                onClick={() => handleOpenInnerModal("Deactivate")}>
+                                                Deactivate
+                                            </button>
+                                        )}
+                                        {profile.VerificationStatus === "verified" ? (
+                                            <button className="text-sm text-black px-3 py-2 bg-white border-2 rounded-md"
+                                                onClick={() => handleOpenInnerModal("Edit")}>
+                                                Edit
+                                            </button>
+                                        ) : (
+                                            <button className="text-sm text-white px-3 py-2 bg-red-500 rounded-md"
+                                                onClick={() => handleOpenInnerModal("VerificationReminder")}>
+                                                Verification Reminder
+                                            </button>
+                                        )}
+                                        {profile.deactivated ? (
+                                            <button className="bg-green-500 text-white font-bold py-2 px-4 rounded hover:bg-green-700"
+                                                onClick={() => handleOpenInnerModal("Reactivate")}>
+                                                Re-activate User
+                                            </button>
+                                        ) : profile.Flagged !== "flag" ? (
+                                            <button className="bg-green-500 text-white font-bold py-2 px-4 rounded hover:bg-green-700"
+                                                onClick={() => handleOpenInnerModal("Verify")}>
+                                                Verify User
+                                            </button>
+                                        ) : (
+                                            <button className="bg-green-500 text-white font-bold py-2 px-4 rounded hover:bg-green-700"
+                                                onClick={() => handleOpenInnerModal("Unflag")}>
+                                                Unflag User
+                                            </button>
                                         )}
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-
-                                    }
-                <div className="mt-3">
-                        <div className="border-b border-gray-200">
-                            <nav className="-mb-px flex">
-                                <button
-                                    className={`mr-8 py-4 px-1 text-center border-b-2 font-medium text-sm ${activeTab === "about"
-                                        ? "border-indigo-500 text-indigo-600"
-                                        : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                                        }`}
-                                    onClick={() => handleTabClick("about")}
-                                >
-                                    About
-                                </button>
-                                <button
-                                    className={`mr-8 py-4 px-1 text-center border-b-2 font-medium text-sm ${activeTab === "passenger"
-                                        ? "border-indigo-500 text-indigo-600"
-                                        : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                                        }`}
-                                    onClick={() => handleTabClick("passenger")}
-                                >
-                                    Trip as Passenger
-                                </button>
-                                <button
-                                    className={`py-4 px-1 text-center border-b-2 font-medium text-sm ${activeTab === "driver"
-                                        ? "border-indigo-500 text-indigo-600"
-                                        : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                                        }`}
-                                    onClick={() => handleTabClick("driver")}
-                                >
-                                    Trip as Driver
-                                </button>
-                            </nav>
-                        </div>
-                        <div className="mt-4">
-                            {activeTab === "about" && <AboutTab profile={profile} />}
-                            {activeTab === "passenger" && <TripAsPassengerTab />}
-                            {activeTab === "driver" && <TripAsDriverTab />}
-                        </div>
-                        <div className="flex items-center justify-end mt-8 sticky -bottom-4 bg-white py-3">
-                            <div className="space-x-4">
-                                {profile.Flagged !== "flag" && (
-                                    <button
-                                        type="button"
-                                        className="text-sm font-semibold text-red-500 hover:text-red-600"
-                                        onClick={() => handleOpenInnerModal("Deactivate")}
-                                    >
-                                        Deactivate
-                                    </button>
-                                )}
-                                {profile.VerificationStatus == "verified" ? (
-                                    <button
-                                        type="button"
-                                        className="text-sm text-black px-3 py-2 bg-white border-2 rounded-md"
-                                        onClick={() => handleOpenInnerModal("Edit")}
-                                    >
-                                        Edit
-                                    </button>
-                                ) : (
-                                    <button
-                                        type="button"
-                                        className="text-sm text-white px-3 py-2 bg-red-500 rounded-md"
-                                        onClick={() => handleOpenInnerModal("VerificationReminder")}
-                                    >
-                                        Verification Reminder
-                                    </button>
-                                )}
-                                {profile.deactivated ? (
-                                    <button
-                                        type="submit"
-                                        className="bg-green-500 text-white font-bold py-2 px-4 rounded hover:bg-green-700"
-                                        onClick={() => handleOpenInnerModal("Reactivate")}
-                                    >
-                                        Re-activate User
-                                    </button>
-                                ) : profile.Flagged !== "flag" ? (
-                                    <button
-                                        type="submit"
-                                        className="bg-green-500 text-white font-bold py-2 px-4 rounded hover:bg-green-700"
-                                        onClick={() => handleOpenInnerModal("Verify")}
-                                    >
-                                        Verify User
-                                    </button>
-                                ) : (
-                                    <button
-                                        type="submit"
-                                        className="bg-green-500 text-white font-bold py-2 px-4 rounded hover:bg-green-700"
-                                        onClick={() => handleOpenInnerModal("Unflag")}
-                                    >
-                                        Unflag User
-                                    </button>
-                                )}
-                            </div>
-                        </div>
-                    </div>
+                        </>
+                    ) : (
+                        <p className="text-center text-gray-500 mt-10">No profile data found.</p>
+                    )}
                 </div>
-
             </Dialog>
-            {activeInnerModal === "Verify" && (
-                <VerifyUserModal
-                    data={profile}
-                    isOpen={activeInnerModal === "Verify"}
-                    onClose={handleInnerModalClose}
-                />
-            )}
-            {activeInnerModal === "Edit" && (
-                <EditUserModal
-                    data={profile}
-                    isOpen={activeInnerModal === "Edit"}
-                    onClose={handleInnerModalClose}
-                />
-            )}
-            {activeInnerModal === "Deactivate" && (
-                <DeactivateUserModal
-                    data={profile}
-                    isOpen={activeInnerModal === "Deactivate"}
-                    onClose={handleInnerModalClose}
-                />
-            )}
-            {activeInnerModal === "Reactivate" && (
-                <ReActivatingUserModal
-                    data={profile}
-                    isOpen={activeInnerModal === "Reactivate"}
-                    onClose={handleInnerModalClose}
-                />
-            )}
-            {activeInnerModal === "VerificationReminder" && (
-                <VerficationReminderModal
-                    data={profile}
-                    isOpen={activeInnerModal === "VerificationReminder"}
-                    onClose={handleInnerModalClose}
-                />
-            )}
-            {activeInnerModal === "Flag" && (
-                <FlagUserModal
-                    data={profile}
-                    isOpen={activeInnerModal === "Flag"}
-                    onClose={handleInnerModalClose}
-                />
-            )}
-            {activeInnerModal === "Unflag" && (
-                <UnFlaggingUserModal
-                    data={profile}
-                    isOpen={activeInnerModal === "Unflag"}
-                    onClose={handleInnerModalClose}
-                />
-            )}
+
+            {/* Modals */}
+            {activeInnerModal === "Verify" && <VerifyUserModal data={profile} isOpen onClose={handleInnerModalClose} />}
+            {activeInnerModal === "Edit" && <EditUserModal data={profile} isOpen onClose={handleInnerModalClose} />}
+            {activeInnerModal === "Deactivate" && <DeactivateUserModal data={profile} isOpen onClose={handleInnerModalClose} />}
+            {activeInnerModal === "Reactivate" && <ReActivatingUserModal data={profile} isOpen onClose={handleInnerModalClose} />}
+            {activeInnerModal === "VerificationReminder" && <VerficationReminderModal data={profile} isOpen onClose={handleInnerModalClose} />}
+            {activeInnerModal === "Flag" && <FlagUserModal data={profile} isOpen onClose={handleInnerModalClose} />}
+            {activeInnerModal === "Unflag" && <UnFlaggingUserModal data={profile} isOpen onClose={handleInnerModalClose} />}
         </>
     );
 };
+
 
 export default ViewProfileModal;
 
@@ -405,49 +295,66 @@ const AboutTab = ({ profile }) => {
 
     return (
         <div>
+
             <div className="grid grid-cols-2 gap-x-40 gap-y-3 w-full">
                 <div>
                     <p className="font-semibold">Email:</p>
-                    <p>{data.email}</p>
+                    <p>{profile?.email}</p>
                 </div>
                 <div>
                     <p className="font-semibold">Phone:</p>
-                    <p>{data.phone}</p>
+                    <p>{profile?.phone}</p>
                 </div>
                 <div>
                     <p className="font-semibold">Date of Birth:</p>
-                    <p>{data.dob}</p>
+                    <p>
+                        {profile?.dob
+                            ? new Date(profile.dob).toLocaleDateString("en-US", {
+                                month: "long",
+                                day: "2-digit",
+                                year: "numeric",
+                            })
+                            : "—"}
+                    </p>
                 </div>
+
                 <div>
                     <p className="font-semibold">Gender:</p>
-                    <p>{data.gender}</p>
+                    <p>{profile?.gender}</p>
                 </div>
-                {profile.VerificationStatus == 'verified' && profile?.Flagged !== 'flag' &&
+                {profile?.VerificationStatus == 'verified' && profile?.Flagged !== 'flag' &&
                     <>
                         <div>
                             <p className="font-semibold">Active Status:</p>
-                            <p>{data.activeStatus}</p>
+                            <p>{profile?.activeStatus}</p>
                         </div>
                         <div>
                             <p className="font-semibold">Ride Count:</p>
-                            <p>{data.rideCount}</p>
+                            <p>{profile?.rideCount}</p>
                         </div>
                     </>
                 }
                 <div>
                     <p className="font-semibold">Registration Date:</p>
-                    <p>{data.registrationDate}</p>
+                    {profile?.created_at
+                        ? new Date(profile.created_at).toLocaleDateString("en-US", {
+                            month: "long",
+                            day: "2-digit",
+                            year: "numeric",
+                        })
+                        : "—"}
+
                 </div>
-                {profile.VerificationStatus !== 'verified' && profile?.Flagged !== 'flag' &&
+                {profile?.VerificationStatus !== 'verified' && profile?.Flagged !== 'flag' &&
                     <div>
 
                     </div>
                 }
-                {profile.VerificationStatus == 'verified' &&
+                {profile?.VerificationStatus == 'verified' &&
 
                     <div>
                         <p className="font-semibold">Verification Date:</p>
-                        <p>{data.verificationDate}</p>
+                        <p>{profile?.verificationDate}</p>
                     </div>
                 }
                 {/* Date flagged and reason flaged */}
@@ -477,18 +384,18 @@ const AboutTab = ({ profile }) => {
                 }
 
 
-                {profile.VerificationStatus == 'verified' && profile?.Flagged !== 'flag' &&
+                {profile?.VerificationStatus == 'verified' && profile?.Flagged !== 'flag' &&
                     <>
                         <div className="">
                             <p className="font-semibold">Car Details:</p>
-                            <p>{data.carDetails.model}</p>
+                            <p>{data.carDetails?.model}</p>
                         </div>
                         <div className="flex justify-between items-center mt-2">
-                            <img src={data.carDetails.feature} alt="Feature" className="ml-3 " />
+                            <img src={data?.carDetails.feature} alt="Feature" className="ml-3 " />
                         </div>
                         <div>
                             <p className="font-semibold">License Number:</p>
-                            <p>{data.carDetails.licenseNumber}</p>
+                            <p>{data?.carDetails.licenseNumber}</p>
                         </div>
                         <div>
                             <p className="font-semibold">Car Color:</p>
@@ -500,27 +407,35 @@ const AboutTab = ({ profile }) => {
                 <div className=" mt-4">
                     <p className="font-semibold">Driver Preferences:</p>
                     <div className="flex flex-wrap gap-2 mt-2">
-                        {data.driverPreferences.map((preference, index) => (
-                            <div key={index} className="flex items-center bg-primary-500 text-white rounded-md px-2 py-1">
-                                <img src={preference.icon} alt="Icon" className="w-4 h-4 mr-2" />
-                                <p>{preference.label}</p>
+                        {profile?.preferences?.map((preference, index) => (
+                            <div
+                                key={index}
+                                className="flex items-center bg-primary-500 text-white rounded-md px-2 py-1 gap-2"
+                            >
+                                <img
+                                    src={`/assets/${preference.icon}.svg`}
+                                    alt={preference.icon}
+                                    className="w-4 h-4"
+                                />
+                                <p>{preference.description}</p>
                             </div>
                         ))}
                     </div>
+
 
                 </div>
                 <div className=" mt-4">
                     <p className="font-semibold">Top Preferences:</p>
                     <div className="flex flex-wrap gap-2 mt-2">
-                        {data.topPreferences.map((preference, index) => (
+                        {profile?.interests?.map((preference, index) => (
                             <div key={index} className="flex items-center bg-[#D6BBFB] text-black rounded-md px-2 py-1">
-                                <img src={preference.icon} alt="Icon" className="w-4 h-4 mr-2 bg-white" />
-                                <p>{preference.label}</p>
+                                <p className="" > {preference.icon}</p>
+                                <p>{preference.description}</p>
                             </div>
                         ))}
                     </div>
                 </div>
-                {profile.VerificationStatus == 'verified' &&
+                {profile?.VerificationStatus == 'verified' &&
                     <div className="col-span-2">
                         <div className="flex items-center border-t-2 justify-between cursor-pointer pt-4" onClick={handleCarDetailsToggle}>
                             <p className="font-semibold text-lg">Full Car details (DVLA):</p>

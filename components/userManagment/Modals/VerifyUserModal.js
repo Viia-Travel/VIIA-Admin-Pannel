@@ -16,118 +16,66 @@ const VerifyUserModal = ({ data, isOpen, onClose }) => {
   const { data: VerificationDoc } = UseGetVerificationDocs(data.id)
   const userTypes = ["passenger", "driver"];
 
+
   const [showResendForm, setShowResendForm] = useState(false);
   const verifyUser = useVerifyUser()
+  
+    const driverDoc = VerificationDoc?.find(doc => doc.for === "driver");
+    const vehicle = driverDoc?.vehicle;
+  
+    const carDetails = {
+      vehicleNumber: {
+        label: "Vehicle Number",
+        value: vehicle?.vehicle_number || "-",
+      },
+      fuelType: {
+        label: "Fuel Type",
+        value: vehicle?.fuelType || "-",
+      },
+      motStatus: {
+        label: "MOT Status",
+        value: vehicle?.motStatus || "-",
+      },
+      colour: {
+        label: "Colour",
+        value: vehicle?.colour || "-",
+      },
+      make: {
+        label: "Make",
+        value: vehicle?.make || "-",
+      },
+      yearOfManufacture: {
+        label: "Year of Manufacture",
+        value: vehicle?.yearOfManufacture || "-",
+      },
+      taxStatus: {
+        label: "Tax Status",
+        value: vehicle?.taxStatus || "-",
+      },
+      monthOfFirstRegistration: {
+        label: "First Registered",
+        value: vehicle?.monthOfFirstRegistration || "-",
+      },
+    };
+  
+  
 
-  const carDetails = {
-    carName: {
-      label: "Car Name",
-      value: "Toyota Camry XLE",
-    },
-    carColor: {
-      label: "Car Colour",
-      value: "Silver",
-    },
-    engineCapacity: {
-      label: "Engine Capacity",
-      value: "2.5L",
-    },
-    fuelType: {
-      label: "Fuel Type",
-      value: "Petrol",
-    },
-    make: {
-      label: "Make",
-      value: "Toyota",
-    },
-    monthOfRegistration: {
-      label: "Month of Registration",
-      value: "December 2004",
-    },
-    registrationNumber: {
-      label: "Registration Number",
-      value: "ABC1234",
-    },
-    revenueWeight: {
-      label: "Revenue Weight",
-      value: "1640 kg",
-    },
-    taxDueDate: {
-      label: "Tax Due Date",
-      value: "4 January 2007",
-    },
-    taxStatus: {
-      label: "Tax Status",
-      value: "Paid",
-    },
-    wheelPlan: {
-      label: "Wheel Plan",
-      value: "4-Wheel",
-    },
-    yearOfManufacture: {
-      label: "Year of Manufacture",
-      value: "2004",
-    },
-    euroStatus: {
-      label: "Euro Status",
-      value: "Euro 4",
-    },
-    realDrivingEmissons: {
-      label: "Real Driving Emissions",
-      value: "1 g/km",
-    },
-    DateofLastV5CIssued: {
-      label: "Date of Last V5C Issued",
-      value: "1 January 2007",
-    },
-    licenseNumber: {
-      label: "License Number",
-      value: "123456789",
-    },
-  };
 
-  // Formik form validation schema using Yup
-  const validationSchema = Yup.object().shape({
-    selectedOption: Yup.string().required("Required"),
-    email: Yup.string().email("Invalid email address").required("Required"),
-  });
-
-  // Formik form submit function
-  const onSubmit = (values, { setSubmitting }) => {
-    // verifyUser.mutate(
-    //   {
-    //     id: data.id,
-    //     type: currentToggle == 0 ? 'passenger' : 'driver'
-    //   }
-    // )
-    setSubmitting(false);
-    onClose(); // Close modal after form submission
-  };
-
-  const submit=()=>{
+  const submit = () => {
     verifyUser.mutate(
       {
         id: data.id,
         type: currentToggle == 0 ? 'passenger' : 'driver'
       },
       {
-        onSuccess:()=>{
-          onClose(); 
+        onSuccess: () => {
+          onClose();
         }
       }
     )
-    
-   
-  }  // Initialize Formik form
-  // const formik = useFormik({
-  //   initialValues: {
-  //     selectedOption: "",
-  //     email: "",
-  //   },
-  //   validationSchema: validationSchema,
-  //   onSubmit: onSubmit,
-  // });
 
+
+  }
   const handleCloseModal = () => {
     onClose();
     setShowResendForm(false); // Reset the form visibility state on close
@@ -146,14 +94,6 @@ const VerifyUserModal = ({ data, isOpen, onClose }) => {
     setShowResendForm(true);
   };
 
-
-  // Function to handle downloading files
-  const handleDownloadFile = (file) => {
-    // Implement download logic here
-    console.log(`Downloading file: ${file.name}`);
-    // Example: You can open the file in a new tab for download
-    window.open(file.url, "_blank");
-  };
 
   return (
     <><Dialog open={isOpen} onClose={onClose} fullWidth maxWidth="sm" className="rounded-lg">
@@ -195,146 +135,142 @@ const VerifyUserModal = ({ data, isOpen, onClose }) => {
           :
           <>
             {/* <form onSubmit={formik.handleSubmit}> */}
-              <div className="grid grid-cols-2 gap-3 my-3">
-                <div className="">
-                  <label
-                    htmlFor="selectedOption"
-                    className="block text-sm font-medium text-gray-700"
-                  >
-                    Name of the user
-                  </label>
-                  <input
-                    type="text"
-                    id="selectedOption"
-                    name="selectedOption"
-                    // onChange={formik.handleChange}
-                    // onBlur={formik.handleBlur}
-                    value={data.name}
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
-                    placeholder="Enter your email"
-                  />
+            <div className="grid grid-cols-2 gap-3 my-3">
+              <div className="">
+                <label
+                  htmlFor="selectedOption"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Name of the user
+                </label>
+                <input
+                  type="text"
+                  id="selectedOption"
+                  name="selectedOption"
+                  // onChange={formik.handleChange}
+                  // onBlur={formik.handleBlur}
+                  value={data.name}
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                  placeholder="Enter your email"
+                />
 
-                </div>
-                <div className="">
-                  <label
-                    htmlFor="email"
-                    className="block text-sm font-medium text-gray-700"
-                  >
-                    Email
-                  </label>
-                  <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    // onChange={formik.handleChange}
-                    // onBlur={formik.handleBlur}
-                    value={data.email}
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
-                    placeholder="Enter your email"
-                  />
-
-                </div>
               </div>
-              <div className="mb-6">
-                <p className="text-sm font-medium text-gray-700">
-                  ID & Photo verification
+              <div className="">
+                <label
+                  htmlFor="email"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Email
+                </label>
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  // onChange={formik.handleChange}
+                  // onBlur={formik.handleBlur}
+                  value={data.email}
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                  placeholder="Enter your email"
+                />
+
+              </div>
+            </div>
+            <div className="mb-6">
+              <p className="text-sm font-medium text-gray-700 mb-2">
+                ID & Photo Verification
+              </p>
+
+              <div className="grid grid-cols-2 gap-4">
+                {VerificationDoc?.map((doc) => {
+                  if ((currentToggle === 0 && doc.for === "passenger") || (currentToggle === 1 && doc.for === "driver")) {
+                    return (
+                      <React.Fragment key={doc.id}>
+                        {/* Passport */}
+                        {doc.passport && (
+                          <div className="border rounded-lg p-2">
+                            <p className="text-xs font-semibold mb-1">Passport</p>
+                            <img src={doc.passport} alt="Passport" className="w-full h-40 object-contain rounded" />
+                            <p className="text-xs text-gray-500 mt-1">Verified: {doc.passport_verified ? "Yes" : "No"}</p>
+                          </div>
+                        )}
+
+                        {/* Face Photo */}
+                        {doc.face && (
+                          <div className="border rounded-lg p-2">
+                            <p className="text-xs font-semibold mb-1">Face Photo</p>
+                            <img src={doc.face} alt="Face" className="w-full h-40 object-contain rounded" />
+                            <p className="text-xs text-gray-500 mt-1">Verified: {doc.face_verified ? "Yes" : "No"}</p>
+                          </div>
+                        )}
+
+                        {/* License - only for driver */}
+                        {currentToggle === 1 && doc.license && (
+                          <>
+                            {doc.license.front && (
+                              <div className="border rounded-lg p-2">
+                                <p className="text-xs font-semibold mb-1">License Front</p>
+                                <img src={doc.license.front} alt="License Front" className="w-full h-40 object-contain rounded" />
+                              </div>
+                            )}
+                            {doc.license.back && (
+                              <div className="border rounded-lg p-2">
+                                <p className="text-xs font-semibold mb-1">License Back</p>
+                                <img src={doc.license.back} alt="License Back" className="w-full h-40 object-contain rounded" />
+                              </div>
+                            )}
+                            <p className="text-xs text-gray-500 mt-1">License Verified: {doc.license_verified ? "Yes" : "No"}</p>
+                          </>
+                        )}
+                      </React.Fragment>
+                    );
+                  }
+                  return null;
+                })}
+              </div>
+            </div>
+
+            {currentToggle === 1 && (
+              <div>
+                <p className="text-sm font-medium text-gray-700 mb-2">
+                  Car details (DVLA)
                 </p>
-                <div className="grid grid-cols-2 gap-4 my-3 ">
-                  <div className="flex  border border-gray-300 rounded-lg p-4">
-                    <label
-                      htmlFor="idFile"
-                      className="text-sm text-gray-600 cursor-pointer"
-                    >
-
-                      <input
-                        id="idFile"
-                        name="idFile"
-                        type="file"
-                        readOnly
-                        className="hidden"
-                      />
-                    </label>
-                    <button
-                      type="button"
-                      className="text-sm flex space-x-3 text-gray-500 cursor-pointer mt-1 items-center "
-                      onClick={() => handleDownloadFile(selectedIdFile)}
-                      disabled={!selectedIdFile}
-                    >
-                      Tech design requirements.pdf
-                      {/* {selectedIdFile ? selectedIdFile.name : "  File"} */}
-                      <DownloadIcon className="h-5 w-5 ml-3" />
-                    </button>
-                  </div>
-                  <div className="flex  border border-gray-300 rounded-lg p-4">
-                    <label
-                      htmlFor="idFile"
-                      className="text-sm text-gray-600 cursor-pointer"
-                    >
-
-                      <input
-                        id="idFile"
-                        name="idFile"
-                        type="file"
-                        readOnly
-                        className="hidden"
-                      />
-                    </label>
-                    <button
-                      type="button"
-                      className="text-sm flex space-x-3 text-gray-500 cursor-pointer mt-1 items-center "
-                      onClick={() => handleDownloadFile(selectedIdFile)}
-                      disabled={!selectedIdFile}
-                    >
-                      Tech design requirements.pdf
-                      {/* {selectedIdFile ? selectedIdFile.name : "  File"} */}
-                      <DownloadIcon className="h-5 w-5 ml-3" />
-                    </button>
-                  </div>
+                <div className="grid grid-cols-2 gap-4">
+                  {Object.entries(carDetails).map(([key, { label, value }]) => (
+                    <div key={key} className="mb-4">
+                      <p className="text-sm font-medium text-gray-700">{label}</p>
+                      <p className="text-sm text-gray-600">{value}</p>
+                    </div>
+                  ))}
                 </div>
               </div>
-              {currentToggle === 1 && (
-                <div>
-                  <p className="text-sm font-medium text-gray-700 mb-2">
-                    Car details (DVLA)
-                  </p>
-                  <div className="grid grid-cols-2 gap-4">
-                    {Object.entries(carDetails).map(([key, { label, value }]) => (
-                      <div key={key} className="mb-4">
-                        <p className="text-sm font-medium text-gray-700">
-                          {label}
-                        </p>
-                        <p className="text-sm text-gray-600">{value}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-              <div className="flex items-center justify-between mt-8">
+            )}
+
+            <div className="flex items-center justify-between mt-8">
+              <button
+                type="button"
+                className="text-sm font-semibold text-primary-500 hover:text-primary-600"
+                onClick={handleRequestResend}
+              >
+                Request to resend documents
+              </button>
+              <div className="space-x-4">
                 <button
                   type="button"
-                  className="text-sm font-semibold text-primary-500 hover:text-primary-600"
-                  onClick={handleRequestResend}
+                  className="text-sm text-white px-3 py-2 bg-red-500 rounded-md"
+                  onClick={handleCloseModal}
                 >
-                  Request to resend documents
+                  Cancel
                 </button>
-                <div className="space-x-4">
-                  <button
-                    type="button"
-                    className="text-sm text-white px-3 py-2 bg-red-500 rounded-md"
-                    onClick={handleCloseModal}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    onClick={()=>submit()}
-                    className="bg-green-500 text-white font-bold py-2 px-4 rounded hover:bg-green-700"
-                    // disabled={formik.isSubmitting}
-                  >
-                    Verify User
-                  </button>
-                </div>
+                <button
+                  type="submit"
+                  onClick={() => submit()}
+                  className="bg-green-500 text-white font-bold py-2 px-4 rounded hover:bg-green-700"
+                // disabled={formik.isSubmitting}
+                >
+                  Verify User
+                </button>
               </div>
+            </div>
             {/* </form> */}
           </>
         }

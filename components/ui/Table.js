@@ -35,8 +35,8 @@ const Table = ({ columns, rows ,hoverColor }) => {
     }
   };
 
-  const paginatedRows = rows.slice(page * pageSize, page * pageSize + pageSize);
-  const pageCount = Math.ceil(rows.length / pageSize);
+  const paginatedRows = rows?.slice(page * pageSize, page * pageSize + pageSize);
+  const pageCount = Math.ceil(rows?.length / pageSize);
 
   return (
     <ThemeProvider theme={theme}>

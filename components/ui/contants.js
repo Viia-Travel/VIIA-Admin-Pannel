@@ -52,10 +52,20 @@ export const allUsersColumns = [
   },
   { field: "phone", headerName: "Phone number", flex: 1 },
   {
-    field: "DateRegistered",
-    headerName: "Date registered",
+    field: "created_at",
+    headerName: "Date Registered",
     flex: 1,
-  },
+    renderCell: (params) => {
+      const date = new Date(params.value);
+      const formattedDate = date.toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      });
+      return <div>{formattedDate}</div>;
+    },
+  }
+,  
   {
     field: "gender",
     headerName: "Gender",
@@ -66,39 +76,39 @@ export const allUsersColumns = [
     headerName: "User type",
     flex: 1,
   },
-  {
-    field: "ActiveStatus",
-    headerName: "Active Status",
-    flex: 1,
-    renderCell: (params) => (
-      <div className="my-2 p-2 px-4 text-sm rounded-md"
-        style={{
-          backgroundColor: params.value === "Active" ? "#ECFDF3" : "#ECFDF3",
-        }}
-      >
-        {params.value === "Active" ? "Active" : "Inactive"}
-      </div>
-    ),
-  },
-  {
-    field: "RidesCount",
-    headerName: "Rides count",
-    flex: 1,
-  },
-  {
-    field: "Flagged",
-    headerName: "Flagged",
-    flex: 1,
-    renderCell: (params) => (
-      <div>
-        {params.value === "flag" ? (
-          <img className="w-[22px] my-4" src="/assets/flag.svg" alt="Flagged" />
-        ) : (
-          params.value
-        )}
-      </div>
-    ),
-  },
+  // {
+  //   field: "ActiveStatus",
+  //   headerName: "Active Status",
+  //   flex: 1,
+  //   renderCell: (params) => (
+  //     <div className="my-2 p-2 px-4 text-sm rounded-md"
+  //       style={{
+  //         backgroundColor: params.value === "Active" ? "#ECFDF3" : "#ECFDF3",
+  //       }}
+  //     >
+  //       {params.value === "Active" ? "Active" : "Inactive"}
+  //     </div>
+  //   ),
+  // },
+  // {
+  //   field: "RidesCount",
+  //   headerName: "Rides count",
+  //   flex: 1,
+  // },
+  // {
+  //   field: "Flagged",
+  //   headerName: "Flagged",
+  //   flex: 1,
+  //   renderCell: (params) => (
+  //     <div>
+  //       {params.value === "flag" ? (
+  //         <img className="w-[22px] my-4" src="/assets/flag.svg" alt="Flagged" />
+  //       ) : (
+  //         params.value
+  //       )}
+  //     </div>
+  //   ),
+  // },
   {
     field: "VerificationStatus",
     headerName: "Verification Status",
@@ -681,7 +691,7 @@ export const allTicketsColumn = [
         <div
           className="mt-4 px-1  w-20 text-center text-sm rounded-full"
           style={{
-            color: params.value === "Resolved" ? "#027A48" : params.value === "Pending" ? "#344054" : "#175CD3" ,
+            color: params.value === "Resolved" ? "#027A48" : params.value === "Pending" ? "#344054" : "#175CD3",
             backgroundColor: params.value === "Resolved" ? "#ECFDF3" : params.value === "Pending" ? "#F2F4F7" : "#EFF8FF",
           }}
         >
@@ -700,7 +710,7 @@ export const allTicketsColumn = [
       return (
 
         <Link href={`/support/${params.row.id}`}>
-          <ChatBubbleLeftEllipsisIcon className='text-blue-500 h-8 w-7 mt-2  cursor-pointer'/>
+          <ChatBubbleLeftEllipsisIcon className='text-blue-500 h-8 w-7 mt-2  cursor-pointer' />
         </Link>
       );
     },
@@ -709,120 +719,154 @@ export const allTicketsColumn = [
 ]
 
 export const allBookingsColumn = [
-  { field: "driver_name", headerName: "Name of Driver", flex: 1 },
-  { field: "passenger_name", headerName: "Name of Passenger", flex: 1 },
-  { field: "pickup_point", headerName: "Pickup Point", flex: 1 },
-  { field: "destination", headerName: "Destination", flex: 1 },
   {
-    field: "date",
-    headerName: "Date",
+    field: "driver_name",
+    headerName: "Name of Driver",
     flex: 1,
-    
-    
-  },
-  { field: "time", headerName: "Time", flex: 1 },
-  { field: "seats", headerName: "Seats", flex: 1 ,
     renderCell: (params) => {
-      return (
-        <div className='font-semibold'>
-         {params.value}
-        </div>
-      );
+      const driverName =
+        params.row.ride_type === "published"
+          ? `${params.row.driver?.fname || ""} ${params.row.driver?.lname || ""}`
+          : "—";
+      return <div>{driverName}</div>;
     },
   },
-  { field: "price", headerName: "Price", flex: 1 ,
+  {
+    field: "passenger_name",
+    headerName: "Name of Passenger",
+    flex: 2,
     renderCell: (params) => {
-      return (
-        <div className='font-semibold'>
-         {params.value}
-        </div>
-      );
+      const passengerName =
+        params.row.ride_type === "requested"
+          ? `${params.row.requester?.fname || ""} ${params.row.requester?.lname || ""}`
+          : `${params.row.passengers?.[0]?.user?.fname || ""} ${params.row.passengers?.[0]?.user?.lname || ""}`;
+      return <div>{passengerName}</div>;
     },
   },
   
+  {
+    field: "pickup",
+    headerName: "Pickup Point",
+    flex: 4,
+  },
+  {
+    field: "destination",
+    headerName: "Destination",
+    flex: 4,
+  },
+  {
+    field: "date",
+    headerName: "Date",
+    flex: 2,
+  },
+  {
+    field: "time",
+    headerName: "Time",
+    flex: 2,
+  },
+  {
+    field: "car_space",
+    headerName: "Seats",
+    flex: 1,
+    renderCell: (params) => {
+      return <div className='font-semibold'>{params.value ?? "—"}</div>;
+    },
+  },
+  {
+    field: "cost",
+    headerName: "Price",
+    flex: 1,
+    renderCell: (params) => {
+      return <div className='font-semibold'>£{params.value}</div>;
+    },
+  },
   {
     flex: 1,
     renderCell: (params) => {
       return (
         <div className='m-2 flex justify-end'>
-          <BookingCustomeMenu data={params.row} userType={'Booking'}/>
+          <BookingCustomeMenu data={params.row} userType={'Booking'} />
         </div>
       );
     },
   },
 ];
 
+
 export const requestedRidesColumn = [
-  { field: "passenger_name", headerName: "Name of Passenger", flex: 1 },
-  { field: "pickup_point", headerName: "Pickup Point", flex: 1 },
-  { field: "destination", headerName: "Destination", flex: 1 },
   {
-    field: "date",
-    headerName: "Date",
+    field: "passenger_name",
+    headerName: "Name of Passenger",
     flex: 1,
-    
-    
-  },
-  { field: "time", headerName: "Time", flex: 1 },
-  { field: "price", headerName: "Price", flex: 1 ,
     renderCell: (params) => {
-      return (
-        <div className='font-semibold'>
-         {params.value}
-        </div>
-      );
+      const passengerName = `${params.row.requester?.fname || ""} ${params.row.requester?.lname || ""}`;
+      return <div>{passengerName}</div>;
     },
+  },
+  { field: "pickup", headerName: "Pickup Point", flex: 3 },
+  { field: "destination", headerName: "Destination", flex: 3 },
+  { field: "date", headerName: "Date", flex: 1 },
+  { field: "time", headerName: "Time", flex: 1 },
+  {
+    field: "cost",
+    headerName: "Price",
+    flex: 1,
+    renderCell: (params) => (
+      <div className="font-semibold">{params.value}</div>
+    ),
   },
   {
-    renderCell: (params) => {
-      return (
-        <div className='my-2 flex justify-end'>
-          <BookingCustomeMenu data={params.row} userType={'Requested'}/>
-        </div>
-      );
-    },
+    field: "actions",
+    headerName: "",
+    flex: 1,
+    renderCell: (params) => (
+      <div className="my-2 flex justify-end w-full">
+        <BookingCustomeMenu data={params.row} userType="Requested" />
+      </div>
+    ),
   },
 ];
 
 
 export const publishedRidesColumn = [
-  { field: "driver_name", headerName: "Name of Driver", flex: 1 },
-  { field: "pickup_point", headerName: "Pickup Point", flex: 1 },
-  { field: "destination", headerName: "Destination", flex: 1 },
   {
-    field: "date",
-    headerName: "Date",
+    field: "driver_name",
+    headerName: "Name of Driver",
     flex: 1,
-    
-    
+    renderCell: (params) => {
+      const driverName = `${params.row.driver?.fname || ""} ${params.row.driver?.lname || ""}`;
+      return <div>{driverName}</div>;
+    },
   },
+  { field: "pickup", headerName: "Pickup Point", flex: 2 },
+  { field: "destination", headerName: "Destination", flex: 2 },
+  { field: "date", headerName: "Date", flex: 1 },
   { field: "time", headerName: "Time", flex: 1 },
-  { field: "seats", headerName: "Seats", flex: 1 ,
-    renderCell: (params) => {
-      return (
-        <div className='font-semibold'>
-         {params.value}
-        </div>
-      );
-    },
-  },
-  { field: "price", headerName: "Price", flex: 1 ,
-    renderCell: (params) => {
-      return (
-        <div className='font-semibold'>
-         {params.value}
-        </div>
-      );
-    },
+  {
+    field: "car_space",
+    headerName: "Seats",
+    flex: 1,
+    renderCell: (params) => (
+      <div className="font-semibold">{params.value}</div>
+    ),
   },
   {
-    renderCell: (params) => {
-      return (
-        <div className='my-2 flex justify-end'>
-          <BookingCustomeMenu data={params.row} userType={'Published'}/>
-        </div>
-      );
-    },
+    field: "cost",
+    headerName: "Price",
+    flex: 1,
+    renderCell: (params) => (
+      <div className="font-semibold">{params.value}</div>
+    ),
+  },
+  {
+    field: "actions",
+    headerName: "",
+    flex: 1,
+    renderCell: (params) => (
+      <div className="my-2 flex justify-end w-full">
+        <BookingCustomeMenu data={params.row} userType="Published" />
+      </div>
+    ),
   },
 ];
 
@@ -850,7 +894,7 @@ export const deletedBookingsColumn = [
     flex: 1,
     renderCell: (params) => {
       return (
-        <BookingCustomeMenu data={params.row} userType={'Deleted'}/>
+        <BookingCustomeMenu data={params.row} userType={'Deleted'} />
       );
     },
   },
@@ -881,7 +925,7 @@ export const onGoingTripColumns = [
     flex: 2,
   },
 
-  
+
   {
     field: "start_time",
     headerName: "Time Started",
@@ -892,11 +936,12 @@ export const onGoingTripColumns = [
     headerName: "ETA",
     flex: 2,
   },
-  { field: "price", headerName: "Price", flex: 2 ,
+  {
+    field: "price", headerName: "Price", flex: 2,
     renderCell: (params) => {
       return (
         <div className='font-semibold'>
-         {params.value}
+          {params.value}
         </div>
       );
     },
@@ -936,12 +981,12 @@ export const completedTripColumns = [
     flex: 2,
   },
 
-  
+
   {
     field: "start_time",
     headerName: "Time Started",
     flex: 3,
-    renderCell: (params)=>(
+    renderCell: (params) => (
       <div>
         {params.value}-{params.row.end_time}
       </div>
@@ -959,15 +1004,16 @@ export const completedTripColumns = [
         }}
 
       >
-      {params.value}
+        {params.value}
       </div>
     ),
   },
-  { field: "price", headerName: "Price", flex: 2 ,
+  {
+    field: "price", headerName: "Price", flex: 2,
     renderCell: (params) => {
       return (
         <div className='font-semibold'>
-         {params.value}
+          {params.value}
         </div>
       );
     },
@@ -976,7 +1022,7 @@ export const completedTripColumns = [
     renderCell: (params) => {
       return (
         <div className='my-2 flex justify-end'>
-          <RideMenu userType={'complete'}data={params.row} />
+          <RideMenu userType={'complete'} data={params.row} />
         </div>
       );
     },

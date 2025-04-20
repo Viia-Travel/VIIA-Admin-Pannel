@@ -16,7 +16,7 @@ export default function useVerifyUser() {
         return await axios.patch(
             `https://viiabackend.com/api/v1/admin/users/${id}/${type}/verification`,
                 {
-                    "verify":0
+                    "verify":1
                 }
 
             ,
