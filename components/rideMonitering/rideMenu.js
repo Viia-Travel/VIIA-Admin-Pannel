@@ -27,7 +27,7 @@ export default function RideMenu({ data, userType }) {
     };
 
     const handleLiveTracking = () => {
-        router.push("/ride-monitering/live-tracking")
+        router.push(`/ride-monitering/live-tracking?id=${data.id}`)
     };
 
 

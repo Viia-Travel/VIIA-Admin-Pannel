@@ -6,45 +6,91 @@ import DriverInfo from "../RideComponents/DriverInfo";
 import PassengerInfo from "../RideComponents/PassengerInfo";
 import Safety from "../RideComponents/Safety";
 import { useRouter } from "next/router";
+import { UseGetRideDetail } from "@/hooks/query/rides/getRideDetail";
+
+const calculateDistance = (lat1, lon1, lat2, lon2) => {
+    const R = 6371; // Radius of the earth in km
+    const dLat = deg2rad(lat2 - lat1);
+    const dLon = deg2rad(lon2 - lon1);
+    const a = 
+        Math.sin(dLat/2) * Math.sin(dLat/2) +
+        Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * 
+        Math.sin(dLon/2) * Math.sin(dLon/2); 
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+    const distance = R * c; // Distance in km
+    return distance.toFixed(1);
+};
+
+const deg2rad = (deg) => {
+    return deg * (Math.PI/180);
+};
 
 const ViewTripInformation = ({ isOpen, onClose, data, userType }) => {
     const [currentTab, setCurrentTab] = useState(0);
-    const router = useRouter()
+    const router = useRouter();
+    const { data: rideDetail } = UseGetRideDetail(data.id);
+
     const handleTabChange = (index) => {
         setCurrentTab(index);
     };
 
+    const getDistance = () => {
+        if (!rideDetail?.pickup_lat_long || !rideDetail?.destination_lat_long) return "Calculating...";
+        
+        const [pickupLat, pickupLon] = rideDetail.pickup_lat_long.split(',').map(Number);
+        const [destLat, destLon] = rideDetail.destination_lat_long.split(',').map(Number);
+        
+        return `${calculateDistance(pickupLat, pickupLon, destLat, destLon)} km`;
+    };
+
     const tripData = {
         tripStatus: {
-            distanceCovered: "25 miles",
-            startPoint: "Downtown",
-            currentLocation: "Hamilton Road, Manchester, England.",
-            endPoint: "Airport",
-            date: "August 19, 2024",
-            startTime: "08:00 AM",
-            estimatedEndTime: "09:00 AM",
-            price: "$30.00",
+            distanceCovered: getDistance(),
+            startPoint: rideDetail?.pickup || "N/A",
+            currentLocation: rideDetail?.current_location || "N/A",
+            endPoint: rideDetail?.destination || "N/A",
+            date: rideDetail?.date || "N/A",
+            startTime: rideDetail?.time || "N/A",
+            estimatedEndTime: "Calculating...", // You might want to calculate this
+            price: `£${rideDetail?.cost || 0}`,
         },
         carDetails: {
-            model: "Tesla Model S",
-            color: "Red",
-            price: "$70,000",
-            licenseNumber: "ABC1234",
-            imageUrl: "https://example.com/car.jpg",
+            model: rideDetail?.driver?.vehicle?.make || "N/A",
+            color: rideDetail?.driver?.vehicle?.colour || "N/A",
+            licenseNumber: rideDetail?.driver?.vehicle?.numberPlate || "N/A",
         },
         driverInfo: {
-            phone: "09-000-3333-4444",
-            email: "john@example.com",
-            dob: "20 /04/ 2001",
-            gender: 'Male',
+            name: `${rideDetail?.driver?.fname || ""} ${rideDetail?.driver?.lname || ""}`,
+            phone: rideDetail?.driver?.phone || "N/A",
+            email: rideDetail?.driver?.email || "N/A",
+            dob: rideDetail?.driver?.dob || "N/A",
+            gender: rideDetail?.driver?.gender || "N/A",
+            rating: rideDetail?.driver?.average_rating?.average || 0,
+            totalReviews: rideDetail?.driver?.average_rating?.total_reviews || 0,
+            avatar: rideDetail?.driver?.avatar,
+            preferences: rideDetail?.driver?.preferences ? JSON.parse(rideDetail?.driver?.preferences) : [],
         },
-        passengerInfo: [
-            { name: "Alice", email: "alice@example.com" },
-            { name: "Bob", email: "bob@example.com" },
-        ],
+        passengerInfo: rideDetail?.passengers?.map(passenger => ({
+            name: `${passenger.user?.fname || ""} ${passenger.user?.lname || ""}`,
+            email: passenger.user?.email || "N/A",
+            phone: passenger.user?.phone || "N/A",
+            dob: passenger.user?.dob || "N/A",
+            gender: passenger.user?.gender || "N/A",
+            rating: passenger.user?.average_rating?.average || 0,
+            totalReviews: passenger.user?.average_rating?.total_reviews || 0,
+            avatar: passenger.user?.avatar,
+            rideStatus: passenger.ride_status || "N/A",
+            paymentStatus: passenger.payment_status || "N/A",
+            preferences: passenger.user?.preferences ? JSON.parse(passenger.user?.preferences) : [],
+            interests: passenger.user?.interests ? JSON.parse(passenger.user?.interests) : [],
+        })) || [],
         safetyInfo: {
-            phone: "09-000-3333-4444",
-            email: "john@example.com",
+            driverPhone: rideDetail?.driver?.phone || "N/A",
+            driverEmail: rideDetail?.driver?.email || "N/A",
+            driverAvatar: rideDetail?.driver?.avatar || "N/A",
+            requesterPhone: rideDetail?.requester?.phone || "N/A",
+            requesterEmail: rideDetail?.requester?.email || "N/A",
+            requesterAvatar: rideDetail?.requester?.avatar || "N/A",
         },
     };
 
@@ -64,27 +110,31 @@ const ViewTripInformation = ({ isOpen, onClose, data, userType }) => {
             </DialogTitle>
             <div className="p-5 text-lg">
                 <h2>
-                    <span className="font-semibold">Trip Code: </span>
-                    {data.tripCodeID}
+                    <span className="font-semibold">Trip ID: </span>
+                    {rideDetail?.id}
                 </h2>
                 <div className="flex space-x-3 mt-3 pb-2 border-b">
                     <h2>Trip Status</h2>
                     <div
-                        className={`px-4 py-1 rounded-lg text-sm font-semibold ${userType === "ongoing" ? "bg-blue-100 text-blue-600" : "bg-green-100 text-green-600"
-                            }`}
+                        className={`px-4 py-1 rounded-lg text-sm font-semibold ${
+                            userType === 'ongoing' ? "bg-blue-100 text-blue-600" : "bg-green-100 text-green-600"
+                        }`}
                     >
-                        {userType === "ongoing" ? "In-progress" : "Completed"}
+                        {userType === 'ongoing' ? "In-progress" : "Completed"}
                     </div>
                 </div>
             </div>
             <div>
-                <div className="grid grid-cols-5 gap-4 mx-5 border-b bg-gray-100  border-gray-300">
+                <div className="grid grid-cols-5 gap-4 mx-5 border-b bg-gray-100 border-gray-300">
                     {tabList.map((tab, index) => (
                         <div
                             key={index}
                             onClick={() => handleTabChange(index)}
-                            className={`cursor-pointer text-center py-2 px-4  ${currentTab === index ? "bg-white border rounded-lg text-black shadow-md" : "bg-gray-100 text-[#667085]"
-                                }`}
+                            className={`cursor-pointer text-center py-2 px-4 ${
+                                currentTab === index 
+                                    ? "bg-white border rounded-lg text-black shadow-md" 
+                                    : "bg-gray-100 text-[#667085]"
+                            }`}
                         >
                             {tab}
                         </div>
@@ -97,15 +147,17 @@ const ViewTripInformation = ({ isOpen, onClose, data, userType }) => {
                     {currentTab === 3 && <PassengerInfo passengers={tripData.passengerInfo} />}
                     {currentTab === 4 && <Safety safetyInfo={tripData.safetyInfo} />}
                 </div>
-                <div className="flex space-x-5 justify-end border-gray-200 p-4 text-base font-semibold ">
+                {/* <div className="flex space-x-5 justify-end border-gray-200 p-4 text-base font-semibold">
                     <button className="text-black border px-3 py-1 rounded-md" onClick={onClose}>
                         Back
                     </button>
-                    <button className="bg-green-500 text-white px-3 py-1 rounded-md" onClick={() => router.push("/ride-monitering/live-tracking")}>
+                    <button 
+                        className="bg-green-500 text-white px-3 py-1 rounded-md" 
+                        onClick={() => router.push(`/ride-monitering/live-tracking?id=${rideDetail?.id}`)}
+                    >
                         Live Tracking
                     </button>
-
-                </div>
+                </div> */}
             </div>
         </Dialog>
     );

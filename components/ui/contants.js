@@ -65,7 +65,7 @@ export const allUsersColumns = [
       return <div>{formattedDate}</div>;
     },
   }
-,  
+  ,
   {
     field: "gender",
     headerName: "Gender",
@@ -743,7 +743,7 @@ export const allBookingsColumn = [
       return <div>{passengerName}</div>;
     },
   },
-  
+
   {
     field: "pickup",
     headerName: "Pickup Point",
@@ -902,52 +902,138 @@ export const deletedBookingsColumn = [
 
 
 export const onGoingTripColumns = [
-  { field: "tripCodeID", headerName: "Trip code ID", flex: 2 },
   {
-    field: "driver_name",
+    field: "id",
+    headerName: "Trip ID",
+    flex: 1
+  },
+  {
+    field: "driver",
     headerName: "Driver",
-    flex: 2,
+    flex: 3,
+    renderCell: (params) => (
+      
+     
+      <div className="flex items-center">
+       
+        {params.value?.avatar && (
+          <img
+            src={params.value.avatar == 'https://viiabackend.com/storage/profile/no-image.png' ? '/assets/image.png' : params.value.avatar}
+            alt="driver"
+            className="w-8 h-8 rounded-full mr-2"
+          />
+        )}
+        <span>{params.value ? `${params.value.fname} ${params.value.lname}` : 'N/A'}</span>
+      </div>
+    
+    ),
   },
   {
     field: "passengers",
     headerName: "Passengers",
-    flex: 2,
-  },
-  {
-    field: "start_point",
-    headerName: "Start Point",
-    flex: 2,
-  },
-
-  {
-    field: "end_point",
-    headerName: "Destination",
-    flex: 2,
-  },
-
-
-  {
-    field: "start_time",
-    headerName: "Time Started",
-    flex: 2,
-  },
-  {
-    field: "eta",
-    headerName: "ETA",
-    flex: 2,
-  },
-  {
-    field: "price", headerName: "Price", flex: 2,
+    flex: 4,
     renderCell: (params) => {
+
+      if (!params.value || !Array.isArray(params.value)) {
+        return <div>No passengers</div>;
+      }
+
       return (
-        <div className='font-semibold'>
-          {params.value}
+        <div className="flex items-center space-x-2  mt-1 ml-2">
+          {params.value.length > 0 ? (
+            <>
+              {params.value.slice(0, 3).map((passenger) => (
+                <div key={passenger.id} className="flex items-center group relative">
+                  <img
+                    src={passenger.user?.avatar == 'https://viiabackend.com/storage/profile/no-image.png' ? '/assets/image.png' : passenger.user?.avatar}
+                    alt={`${passenger.user?.fname} ${passenger.user?.lname}`}
+                    className="w-8  h-8 rounded-full object-cover border border-gray-200"
+
+                  />
+
+                  {passenger.ride_status === 'ended' && (
+                    <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border border-white"></div>
+                  )}
+                </div>
+              ))}
+              {params.value.length > 3 && (
+                <span className="text-sm text-gray-500">
+                  +{params.value.length - 3} more
+                </span>
+              )}
+            </>
+          ) : 'No passengers'}
         </div>
       );
     },
   },
-
   {
+    field: "pickup",
+    headerName: "Pickup Location",
+    flex: 4,
+  },
+  {
+    field: "destination",
+    headerName: "Destination",
+    flex: 4,
+  },
+  {
+    field: "time",
+    headerName: "Time",
+    flex: 2,
+    renderCell: (params) => (
+      <div>
+        <div>{params.row.time}</div>
+
+      </div>
+    ),
+  },
+  {
+    field: "date",
+    headerName: "Date",
+    flex: 2,
+    renderCell: (params) => (
+      <div>
+        <div>{params.row.date}</div>
+
+      </div>
+    ),
+  },
+  {
+    field: "available_space",
+    headerName: "Available Seats",
+    flex: 1,
+    renderCell: (params) => (
+      <div className="flex items-center">
+        <span className="text-gray-500">{params.value}</span>
+      </div>
+    ),
+  },
+  {
+    field: "cost",
+    headerName: "Price",
+    flex: 1,
+    renderCell: (params) => (
+      <div className="font-semibold">
+        £{params.value}
+      </div>
+    ),
+  },
+  {
+    field: "ride_type",
+    headerName: "Type",
+    flex: 2,
+    renderCell: (params) => (
+      <div className={`px-1 py-1 mt-2 text-center rounded-full text-sm ${params.value === 'published'
+        ? 'bg-blue-100 text-blue-600'
+        : 'bg-purple-100 text-purple-600'
+        }`}>
+        {params.value === 'published' ? 'Published' : 'Requested'}
+      </div>
+    ),
+  },
+  {
+    flex: 1,
     renderCell: (params) => {
       return (
         <div className='my-2 flex justify-end'>
@@ -956,67 +1042,122 @@ export const onGoingTripColumns = [
       );
     },
   },
-]
+];
+
 export const completedTripColumns = [
-  { field: "tripCodeID", headerName: "Trip code ID", flex: 2 },
   {
-    field: "driver_name",
+    field: "id",
+    headerName: "Trip ID",
+    flex: 1
+  },
+  {
+    field: "driver",
     headerName: "Driver",
     flex: 2,
-  },
-  {
-    field: "passengers",
-    headerName: "Passengers",
-    flex: 2,
-  },
-  {
-    field: "start_point",
-    headerName: "Start Point",
-    flex: 2,
-  },
-
-  {
-    field: "end_point",
-    headerName: "Destination",
-    flex: 2,
-  },
-
-
-  {
-    field: "start_time",
-    headerName: "Time Started",
-    flex: 3,
     renderCell: (params) => (
-      <div>
-        {params.value}-{params.row.end_time}
-      </div>
-    )
-  },
-  {
-    field: "status",
-    headerName: "Status",
-    flex: 3,
-    renderCell: (params) => (
-      <div className="my-2 text-center w-24 p-1 text-sm rounded-lg"
-        style={{
-          backgroundColor: params.value === "Completed" ? "#ECFDF3" : "#FEF3F2",
-          color: params.value === "Completed" ? "#027A48" : "#B42318",
-        }}
-
-      >
-        {params.value}
+      <div className="flex items-center">
+        {params.value?.avatar && (
+          <img
+          src={params.value.avatar == 'https://viiabackend.com/storage/profile/no-image.png' ? '/assets/image.png' : params.value.avatar}
+          alt="driver"
+          className="w-8 h-8 rounded-full mr-2"
+        />
+        )}
+        <span>{params.value ? `${params.value.fname} ${params.value.lname}` : 'N/A'}</span>
       </div>
     ),
   },
   {
-    field: "price", headerName: "Price", flex: 2,
+    field: "passengers",
+    headerName: "Passengers",
+    flex: 4,
     renderCell: (params) => {
+      if (!params.value || !Array.isArray(params.value)) {
+        return <div>No passengers</div>;
+      }
+
       return (
-        <div className='font-semibold'>
-          {params.value}
+        <div className="flex items-center space-x-2 ml-2 mt-1">
+          {params.value.length > 0 ? (
+            <>
+              {params.value.slice(0, 3).map((passenger) => (
+                <div key={passenger.id} className="flex items-center group relative">
+                  <img
+                    src={passenger.user.avatar == 'https://viiabackend.com/storage/profile/no-image.png' ? '/assets/image.png' : passenger.user.avatar}
+                    alt={`${passenger.user?.fname} ${passenger.user?.lname}`}
+                    className="w-8 h-8 rounded-full object-cover border border-gray-200"
+
+                  />
+                 
+                  {passenger.ride_status === 'ended' && (
+                    <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border border-white"></div>
+                  )}
+                </div>
+              ))}
+              {params.value.length > 3 && (
+                <span className="text-sm text-gray-500">
+                  +{params.value.length - 3} more
+                </span>
+              )}
+            </>
+          ) : 'No passengers'}
         </div>
       );
     },
+  },
+  {
+    field: "pickup",
+    headerName: "Pickup Location",
+    flex: 2,
+  },
+  {
+    field: "destination",
+    headerName: "Destination",
+    flex: 2,
+  },
+  {
+    field: "time",
+    headerName: "Time",
+    flex: 1,
+    renderCell: (params) => (
+      <div>
+        <div>{params.row.date}</div>
+        <div className="text-sm text-gray-500">{params.value}</div>
+      </div>
+    ),
+  },
+  {
+    field: "available_space",
+    headerName: "Available Seats",
+    flex: 1,
+    renderCell: (params) => (
+      <div className="flex items-center">
+        <span className="text-gray-500">{params.value}</span>
+      </div>
+    ),
+  },
+  {
+    field: "cost",
+    headerName: "Price",
+    flex: 1,
+    renderCell: (params) => (
+      <div className="font-semibold">
+        £{params.value}
+      </div>
+    ),
+  },
+  {
+    field: "ride_type",
+    headerName: "Type",
+    flex: 1.5,
+    renderCell: (params) => (
+      <div className={`px-3 py-1 mt-2 rounded-full text-sm ${params.value === 'published'
+        ? 'bg-blue-100 text-blue-600'
+        : 'bg-purple-100 text-purple-600'
+        }`}>
+        {params.value === 'published' ? 'Published' : 'Requested'}
+      </div>
+    ),
   },
   {
     renderCell: (params) => {
@@ -1027,6 +1168,6 @@ export const completedTripColumns = [
       );
     },
   },
-]
+];
 
 

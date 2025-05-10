@@ -25,9 +25,9 @@ const theme = createTheme({
   },
 });
 
-const Table = ({ columns, rows ,hoverColor }) => {
+const Table = ({ columns, rows ,hoverColor  }) => {
   const [page, setPage] = useState(0);
-  const [pageSize, setPageSize] = useState(5);
+  const [pageSize, setPageSize] = useState(10);
 
   const handlePageChange = (newPage) => {
     if (newPage >= 0 && newPage < Math.ceil(rows.length / pageSize)) {

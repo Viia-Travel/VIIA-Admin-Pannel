@@ -3,34 +3,34 @@ import { CircleIcon } from "lucide-react";
 import { CheckBadgeIcon } from "@heroicons/react/24/solid";
 
 const DriverInfo = ({ driverData }) => {
-    const ratings = [
-        { stars: 5, review: "Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium,", user: "Alice", age: 22 },
-        { stars: 4, review: "Comfortable and quick.", user: "Bob", age: 12 },
-    ];
-
-    const renderStars = (count) => {
+    const renderStars = (rating) => {
         return Array(5)
             .fill(false)
-            .map((_, i) => i < count);
+            .map((_, i) => i < Math.floor(rating));
     };
+
     const handleFlag = () => {
-        console.log("jbij")
+        console.log("Flag user clicked");
     };
 
     const handleMessage = () => {
-        console.log("jbij")
+        console.log("Message user clicked");
     };
 
     return (
         <div className="p-4 border rounded-lg">
             <div className="flex space-x-4">
                 <div className="relative">
-                    <img src="/assets/user.svg" alt="Profile" className="h-24 w-24 rounded-full" />
+                    <img 
+                        src={driverData.avatar || "/assets/user.svg"} 
+                        alt="Driver Profile" 
+                        className="h-24 w-24 rounded-full object-cover" 
+                    />
                     <CheckBadgeIcon className="absolute bottom-6 right-1 text-blue-500 h-6 w-6" />
                 </div>
                 <div>
                     <div className="flex space-x-2">
-                        <p className="text-xl font-semibold">Joseph Emmanuel</p>
+                        <p className="text-xl font-semibold">{driverData.name}</p>
                         <CircleIcon className="h-3 w-3 text-green-400 fill-green-400 mt-2" />
                     </div>
                     <div className="flex items-center space-x-2">
@@ -42,10 +42,11 @@ const DriverInfo = ({ driverData }) => {
                     </div>
                 </div>
             </div>
-            <div className="mb-4">
+            
+            <div className="mt-6">
                 <h4 className="font-semibold">Ratings</h4>
                 <div className="flex items-center my-2">
-                    {renderStars(5).map((filled, index) => (
+                    {renderStars(driverData.rating).map((filled, index) => (
                         <svg
                             key={index}
                             xmlns="http://www.w3.org/2000/svg"
@@ -62,68 +63,55 @@ const DriverInfo = ({ driverData }) => {
                             />
                         </svg>
                     ))}
-                    <span className="ml-3">({ratings.length} reviews)</span>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                    {ratings.map((rating, index) => (
-                        <div key={index} className="p-4 border rounded-md">
-                            <div className="flex space-x-2 items-center">
-                                <p className="text-sm font-semibold">{rating.user}</p>
-                                <p className="text-xs text-gray-400">{rating.age} yrs</p>
-                                <div className="flex">
-                                    {renderStars(rating.stars).map((filled, i) => (
-                                        <svg
-                                            key={i}
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            fill={filled ? "#03C548" : "none"}
-                                            viewBox="0 0 24 24"
-                                            stroke="currentColor"
-                                            className={`w-4 h-4 ${filled ? "text-lightgreen" : "text-gray-300"}`}
-                                        >
-                                            <path
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                strokeWidth="2"
-                                                d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"
-                                            />
-                                        </svg>
-                                    ))}
-                                </div>
-                            </div>
-                            <p className="text-sm text-wrap">{rating.review}</p>
-                        </div>
-                    ))}
+                    <span className="ml-3">({driverData.totalReviews} reviews)</span>
                 </div>
             </div>
-            <div className="grid grid-cols-2 gap-x-40 gap-y-3 w-full">
+
+            <div className="mt-6 space-y-4">
                 <div>
                     <p className="font-semibold">Email:</p>
-                    <p>{driverData.email}</p>
+                    <p className="text-gray-700">{driverData.email}</p>
                 </div>
                 <div>
                     <p className="font-semibold">Phone:</p>
-                    <p>{driverData.phone}</p>
+                    <p className="text-gray-700">{driverData.phone}</p>
                 </div>
                 <div>
                     <p className="font-semibold">Date of Birth:</p>
-                    <p>{driverData.dob}</p>
+                    <p className="text-gray-700">{driverData.dob}</p>
                 </div>
                 <div>
                     <p className="font-semibold">Gender:</p>
-                    <p>{driverData.gender}</p>
+                    <p className="text-gray-700">{driverData.gender}</p>
                 </div>
+                {driverData.preferences && driverData.preferences.length > 0 && (
+                    <div>
+                        <p className="font-semibold">Preferences:</p>
+                        <div className="flex flex-wrap gap-2 mt-2">
+                            {driverData.preferences.map((pref, index) => (
+                               
+                                    <div
+                                        key={index}
+                                        className="flex items-center bg-primary-500 text-white rounded-md px-2 py-1 gap-2"
+                                    >
+                                        <img
+                                            src={`/assets/${pref.icon}.svg`}
+                                            alt={pref.icon}
+                                            className="w-4 h-4"
+                                        />
+                                        <p>{pref.description}</p>
+                                    </div>
+                              
+                            ))}
+                        </div>
+                    </div>
+                )}
             </div>
-            <div className="flex justify-end space-x-2 mt-8">
-                <button
-                    type="button"
-                    className="text-sm text-red-700 px-3 py-2 bg-white "
 
-                >
-                    Remove From Booking
-                </button>
+            {/* <div className="flex justify-end space-x-2 mt-8">
                 <button
                     type="button"
-                    className="text-sm text-gray-700 px-3 py-2 bg-white border border-gray-300 rounded-md"
+                    className="text-sm text-red-700 px-3 py-2 bg-white border border-red-700 rounded-md hover:bg-red-50"
                     onClick={handleFlag}
                 >
                     Flag User
@@ -135,8 +123,7 @@ const DriverInfo = ({ driverData }) => {
                 >
                     Message
                 </button>
-
-            </div>
+            </div> */}
         </div>
     );
 };

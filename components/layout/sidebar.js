@@ -9,7 +9,7 @@ const Sidebar = ({ mobileNavsidebar, sidebarOpen, setSidebarOpen }) => {
     const navigation = [
         { name: "Dashboard", href: "/dashboard", current: false, img: "/assets/dashboard.svg" },
         { name: "Users", href: "/user-management", current: false, img: "/assets/users.svg" },
-        { name: "Ride Monitoring", href:"/ride-monitering" , current: false, img: "/assets/car.svg" },
+        { name: "Ride Monitoring", href:"/ride-monitering" , current: false, img: "/assets/car.svg" , baseUrl: "/ride-monitering"},
         { name: "Bookings",href: "/bookings", current: false, img: "/assets/booking.svg" },
         { name: "Payments", href: "/payments", current: false, img: "/assets/payment.svg" },
         { name: "Ratings & Reports", href: "/ratings",current: false, img: "/assets/rating.svg" },

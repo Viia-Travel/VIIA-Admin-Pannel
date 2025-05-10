@@ -1,8 +1,9 @@
 import { useQuery } from 'react-query';
 import axios from 'axios';
 
-const fetchAllApprovedLeaves = async (  ) => {
+const RideDetail = async (id) => {
     try {
+       
         const authToken = localStorage.getItem('authToken');
 
         if (!authToken) {
@@ -10,7 +11,7 @@ const fetchAllApprovedLeaves = async (  ) => {
         }
         
       
-        const response = await axios.get(`https://phaseii-backend.amanahhr.com/api/leave-request-list?status=all`, {
+        const response = await axios.get(`https://viiabackend.com/api/v1/ride/${id}/show`, {
 
             headers: {
                 Authorization: `Bearer ${authToken}`,
@@ -18,16 +19,16 @@ const fetchAllApprovedLeaves = async (  ) => {
         });
 
         if (response.status === 200) {
-            return response.data.leaves;
+            return response.data.data;
         } else {
-            throw new Error('Failed to fetch all  leaves');
+            throw new Error('Failed to fetch rides ');
         }
     } catch (error) {
-        console.log('Failed to fetch all   leaves', error);
+        console.log('Failed to fetch rides', error);
 
     }
 };
 
-export const getAllLeaveList = () => {
-    return useQuery('allLeaveList', () => fetchAllApprovedLeaves());
+export const UseGetRideDetail = (id) => {
+    return useQuery('rideDetail', () => RideDetail(id));
 };
